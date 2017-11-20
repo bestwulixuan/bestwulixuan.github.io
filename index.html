@@ -228,6 +228,169 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/06/archives/单例模式/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Lixuan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Wu Lixuan">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/11/06/archives/单例模式/" itemprop="url">设计模式之单例模式</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-06T17:05:27+08:00">
+                2017-11-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/designPatterns/" itemprop="url" rel="index">
+                    <span itemprop="name">设计模式</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>  单例模式属于创建型模式，顾名思义，就是说一个类只有一个实例。</p>
+<h3 id="懒汉式（非线程安全）"><a href="#懒汉式（非线程安全）" class="headerlink" title="懒汉式（非线程安全）"></a>懒汉式（非线程安全）</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">public class Singleton&#123;</div><div class="line">    private static Singleton instance;</div><div class="line">    private Singleton()&#123;</div><div class="line">    &#125;</div><div class="line">    public static Singleton getInstance()&#123;</div><div class="line">        if(instance == null)&#123;</div><div class="line">            instance = new Singleton();   </div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return instance;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>  上述代码使用了懒加载模式，但是在多线程的情况下会产生多个实例，存在并发问题。</p>
+<h3 id="懒汉式（线程安全）"><a href="#懒汉式（线程安全）" class="headerlink" title="懒汉式（线程安全）"></a>懒汉式（线程安全）</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">public static synchronized Singleton getInstance()&#123;</div><div class="line">    if(instance == null)&#123;</div><div class="line">        instance = new Singleton();</div><div class="line">    &#125;</div><div class="line">    return instance;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>  上述方法，将类方法getInstance设置为同步，虽然是线程安全的，但是效率较低，每次调用该方法都会加锁，但是实际上我们只需要在第一次创建对象时加锁。</p>
+<h3 id="懒汉式-双重校验锁"><a href="#懒汉式-双重校验锁" class="headerlink" title="懒汉式(双重校验锁)"></a>懒汉式(双重校验锁)</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">public static Singleton getSingleton()&#123;</div><div class="line">    if(instance == null)&#123;</div><div class="line">        synchronized(Singleton.class)&#123;</div><div class="line">            if(instance == null)&#123;</div><div class="line">                instance = new Singleton();</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return instance;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>  上述代码看似解决了第二种方法效率较低的问题，但实际上在多线程下还是存在问题。问题在于 new Instance() 并非是原子操作，在jvm中大概做了三件事：  </p>
+<ol>
+<li>给instance分配内存。  </li>
+<li>调用Singleton的构造函数，初始化成员变量。  </li>
+<li>将instance对象指向分配的内存空间（这一过程之后对象非null）<br>但是JVM在编译过程中会进行指令重排序，上面的2和3的顺序是不确定的。如果顺序是1-3-2，在2未执行前，被另一个线程抢占，这是instance已经是非null了（但是没有初始化完成），所以线程二会直接返回instance。<br>####volatile有两个作用：  </li>
+<li>保证变量的可见性，每次获取变量的值时都会从主存中去刷新。  </li>
+<li>禁止指令的重排序。<br>所以对于一个volatile变量的写操作都先行发生于后面对这个变量的读操作。(java5中屏蔽重排序才得以修复)。  </li>
+</ol>
+<h3 id="饿汉式"><a href="#饿汉式" class="headerlink" title="饿汉式"></a>饿汉式</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">public class Singleton &#123;</div><div class="line">    private static final Singleton instance = new Singleton();</div><div class="line">    private Singleton()&#123;</div><div class="line">    &#125;</div><div class="line">    public static Singleton getInstance()&#123;</div><div class="line">        return instance;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>  上述写法单例会在加载类后一开始就被初始化，但是这个写法存在缺陷，比如说我们在得到实例之前无法调用某个方法给他设置参数。</p>
+<h3 id="静态内部类"><a href="#静态内部类" class="headerlink" title="静态内部类"></a>静态内部类</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">public class Singleton &#123;</div><div class="line">    private static class SingletonHolder &#123;</div><div class="line">         private static final Singleton INSTANCE = new Singleton();</div><div class="line">    &#125;</div><div class="line">    private Singleton ()&#123;&#125;</div><div class="line">    public static final Singleton getInstance()&#123;</div><div class="line">        return SingletonHolder.INSTANCE;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>  这种写法使用了jvm自身机制来实现线程安全，由于SingletonHolder是私有的，只能通过getInstance()方法来访问，读取实例的时候不会进行同步，不存在性能问题。</p>
+<h3 id="枚举实现"><a href="#枚举实现" class="headerlink" title="枚举实现"></a>枚举实现</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public Enum Singleton&#123;</div><div class="line">    INSTANCE;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>  创建枚举默认就是线程安全的。</p>
+<h3 id="单例注册表实现的单例模式"><a href="#单例注册表实现的单例模式" class="headerlink" title="单例注册表实现的单例模式"></a>单例注册表实现的单例模式</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">public class BeanFactory &#123;</div><div class="line">private static BeanFactory beanFactory = new BeanFactory();</div><div class="line">private BeanFactory()&#123;</div><div class="line">&#125;</div><div class="line">public static BeanFactory getInstance()&#123;</div><div class="line">return beanFactory;</div><div class="line">&#125;</div><div class="line">private final HashMap&lt;String,Object&gt; cashMap = new HashMap();</div><div class="line">public Object getBean(String className)&#123;</div><div class="line">    Object bean = cashMap.get(className);</div><div class="line">        if(bean == null)&#123;</div><div class="line">            synchronized(this.cacheMap)&#123;</div><div class="line">                bean = cacheMap.get(className);</div><div class="line">                if(bean == null)&#123;</div><div class="line">                    try&#123;</div><div class="line">                        bean = Class.forName(className).newInstance();</div><div class="line">                    &#125;catch (InstantiationException e)&#123;</div><div class="line">                        System.err.println(&quot;could not instance an onject of type: &quot;+className);</div><div class="line">                        e.printStackTrace();</div><div class="line">                    &#125;catch (IllegalAccessException e)&#123;</div><div class="line">                    	System.err.println(&quot;could not access &quot;+ className);</div><div class="line">                    	e.printStackTrace();</div><div class="line">                		&#125;catch (ClassNotFoundException e)&#123;</div><div class="line">                    	System.err.println(&quot;could not find class &quot;+className);</div><div class="line">                    	e.printStackTrace();</div><div class="line">                		&#125;</div><div class="line">            		&#125;</div><div class="line">            		cacheMap.put(className,bean);</div><div class="line">         		&#125;</div><div class="line">      	  &#125;</div><div class="line">    return bean; </div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>  这里的cacheMap没有使用volatile关键字，因为在bean = Class.forName(className).newInstance()这句没有执行完成时，cacheMap中不可能存在不完整的对象。Spring就是采用单例注册表来维护bean的单例行。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/09/archives/适配器模式/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1114,7 +1277,7 @@ FROM V$LOCKED_OBJECT l,V$SESSION S WHERE l.SESSION_ID=S.SID;</code><br>2.将上�
             
               <a href="/archives/">
             
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">6</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
