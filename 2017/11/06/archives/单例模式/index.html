@@ -75,7 +75,7 @@
 <meta property="og:url" content="http://yoursite.com/2017/11/06/archives/单例模式/index.html">
 <meta property="og:site_name" content="Wu Lixuan">
 <meta property="og:description" content="单例模式属于创建型模式，顾名思义，就是说一个类只有一个实例。 懒汉式（非线程安全）1234567891011public class Singleton&amp;#123;    private static Singleton instance;    private Singleton()&amp;#123;    &amp;#125;    public static Singleton getInstance">
-<meta property="og:updated_time" content="2017-11-20T11:10:55.655Z">
+<meta property="og:updated_time" content="2017-11-20T11:13:24.715Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="设计模式之单例模式">
 <meta name="twitter:description" content="单例模式属于创建型模式，顾名思义，就是说一个类只有一个实例。 懒汉式（非线程安全）1234567891011public class Singleton&amp;#123;    private static Singleton instance;    private Singleton()&amp;#123;    &amp;#125;    public static Singleton getInstance">
@@ -330,7 +330,7 @@
 <ol>
 <li>给instance分配内存。  </li>
 <li>调用Singleton的构造函数，初始化成员变量。  </li>
-<li>将instance对象指向分配的内存空间（这一过程之后对象非null）<br>但是JVM在编译过程中会进行指令重排序，上面的2和3的顺序是不确定的。如果顺序是1-3-2，在2未执行前，被另一个线程抢占，这是instance已经是非null了（但是没有初始化完成），所以线程二会直接返回instance。<br>####volatile有两个作用：  </li>
+<li>将instance对象指向分配的内存空间（这一过程之后对象非null）<br>但是JVM在编译过程中会进行指令重排序，上面的2和3的顺序是不确定的。如果顺序是1-3-2，在2未执行前，被另一个线程抢占，这是instance已经是非null了（但是没有初始化完成），所以线程二会直接返回instance。  <h4 id="volatile有两个作用："><a href="#volatile有两个作用：" class="headerlink" title="volatile有两个作用："></a>volatile有两个作用：</h4></li>
 <li>保证变量的可见性，每次获取变量的值时都会从主存中去刷新。  </li>
 <li>禁止指令的重排序。<br>所以对于一个volatile变量的写操作都先行发生于后面对这个变量的读操作。(java5中屏蔽重排序才得以修复)。  </li>
 </ol>
@@ -498,7 +498,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#懒汉式（非线程安全）"><span class="nav-number">1.</span> <span class="nav-text">懒汉式（非线程安全）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#懒汉式（线程安全）"><span class="nav-number">2.</span> <span class="nav-text">懒汉式（线程安全）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#懒汉式-双重校验锁"><span class="nav-number">3.</span> <span class="nav-text">懒汉式(双重校验锁)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#饿汉式"><span class="nav-number">4.</span> <span class="nav-text">饿汉式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#静态内部类"><span class="nav-number">5.</span> <span class="nav-text">静态内部类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#枚举实现"><span class="nav-number">6.</span> <span class="nav-text">枚举实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#单例注册表实现的单例模式"><span class="nav-number">7.</span> <span class="nav-text">单例注册表实现的单例模式</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#懒汉式（非线程安全）"><span class="nav-number">1.</span> <span class="nav-text">懒汉式（非线程安全）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#懒汉式（线程安全）"><span class="nav-number">2.</span> <span class="nav-text">懒汉式（线程安全）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#懒汉式-双重校验锁"><span class="nav-number">3.</span> <span class="nav-text">懒汉式(双重校验锁)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#volatile有两个作用："><span class="nav-number">3.1.</span> <span class="nav-text">volatile有两个作用：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#饿汉式"><span class="nav-number">4.</span> <span class="nav-text">饿汉式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#静态内部类"><span class="nav-number">5.</span> <span class="nav-text">静态内部类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#枚举实现"><span class="nav-number">6.</span> <span class="nav-text">枚举实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#单例注册表实现的单例模式"><span class="nav-number">7.</span> <span class="nav-text">单例注册表实现的单例模式</span></a></li></ol></div>
             
 
           </div>
