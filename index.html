@@ -331,7 +331,9 @@
 <ol>
 <li>给instance分配内存。  </li>
 <li>调用Singleton的构造函数，初始化成员变量。  </li>
-<li>将instance对象指向分配的内存空间（这一过程之后对象非null）<br>但是JVM在编译过程中会进行指令重排序，上面的2和3的顺序是不确定的。如果顺序是1-3-2，在2未执行前，被另一个线程抢占，这是instance已经是非null了（但是没有初始化完成），所以线程二会直接返回instance。  <h4 id="volatile有两个作用："><a href="#volatile有两个作用：" class="headerlink" title="volatile有两个作用："></a>volatile有两个作用：</h4></li>
+<li>将instance对象指向分配的内存空间（这一过程之后对象非null）<br>但是JVM在编译过程中会进行指令重排序，上面的2和3的顺序是不确定的。如果顺序是1-3-2，在2未执行前，被另一个线程抢占，这是instance已经是非null了（但是没有初始化完成），所以线程二会直接返回instance。  </li>
+</ol>
+<h4 id="volatile有两个作用"><a href="#volatile有两个作用" class="headerlink" title="volatile有两个作用:"></a>volatile有两个作用:</h4><ol>
 <li>保证变量的可见性，每次获取变量的值时都会从主存中去刷新。  </li>
 <li>禁止指令的重排序。<br>所以对于一个volatile变量的写操作都先行发生于后面对这个变量的读操作。(java5中屏蔽重排序才得以修复)。  </li>
 </ol>
