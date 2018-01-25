@@ -228,6 +228,187 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/08/archives/HashMap的实现原理/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Lixuan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Wu Lixuan">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/08/archives/HashMap的实现原理/" itemprop="url">HashMap的实现原理</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-08T16:55:51+08:00">
+                2018-01-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/dataStructure/" itemprop="url" rel="index">
+                    <span itemprop="name">数据结构</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="1-什么是HashMap"><a href="#1-什么是HashMap" class="headerlink" title="1 什么是HashMap"></a>1 什么是HashMap</h3><p>HashMap是一种用于映射（键值对）的数据结构，底层实现是数组和链表，在jdk1.8之后，引入了红黑数和对扩容的优化机制。  </p>
+<h3 id="2-简介"><a href="#2-简介" class="headerlink" title="2 简介"></a>2 简介</h3><p>HashMap继承自抽象类AbstractMap，并且实现了Map接口，HashMap只能有一个k记录ey为null，允许多个记录值为null，HashMap并不是线程安全的，在多线程的情况下可以使用并发包下的ConcurrentHashMap。  </p>
+<h3 id="3-内部实现"><a href="#3-内部实现" class="headerlink" title="3 内部实现"></a>3 内部实现</h3><p>HashMap是一种key-value的数据结构，底层结构是数组+链表，在jdk1.8版本之后，链表的元素个数大于8时会转化为红黑树结构。  </p>
+<h4 id="3-1存储结构"><a href="#3-1存储结构" class="headerlink" title="3.1存储结构"></a>3.1存储结构</h4><p>HashMap中有一个静态内部类Node<k,v>,该类实现了Map.Entry接口。下面贴一段Node类的源码：  </k,v></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">static class Node&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; &#123;</div><div class="line">	final int hash;</div><div class="line">	final K key;</div><div class="line">	V value;</div><div class="line">	Node&lt;K,V&gt; next;</div><div class="line">	</div><div class="line">	Node(int hash, K key, V value, Node&lt;K,V&gt; next) &#123;</div><div class="line">		this.hash = hash;</div><div class="line">		this.key = key;</div><div class="line">		this.value = value;</div><div class="line">		this.next = next;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	public final K getKey() &#123;</div><div class="line">		return key;</div><div class="line">	&#125;</div><div class="line">	public final V getValue() &#123;</div><div class="line">		return value;</div><div class="line">	&#125;</div><div class="line">	public final String toString() &#123;</div><div class="line">		return key + “=” + value;</div><div class="line">	&#125;</div><div class="line">	public final int hashCode() &#123;</div><div class="line">		return Objects.hashCode(key)^Objects.hashCode(value);</div><div class="line">	&#125;</div><div class="line">	publuc final V setValue(V newValue) &#123;</div><div class="line">		V oldValue = value;</div><div class="line">		value = newValue;</div><div class="line">		return oldValue;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	public final boolean equals(Object o)&#123; </div><div class="line">	   //自己和自己肯定相等 </div><div class="line">		if(o == this)&#123;</div><div class="line">			return true;</div><div class="line">		&#125;</div><div class="line">		//如果是Map.Entry的实例比较，不是直接返回false</div><div class="line">		if(o instanceof Map.Entry)&#123;</div><div class="line">			Map.Entry&lt;?,?&gt; e = (Map.Entry&lt;?,?&gt;)o;</div><div class="line">			//key 和 value 都相等的情况下返回 true</div><div class="line">			if(Objects.equals(key,e.getKey())&amp;&amp;</div><div class="line">			   Objects.equals(value,e.getValue()))</div><div class="line">			   return true;</div><div class="line">		 &#125;</div><div class="line">	    return false;</div><div class="line">	 &#125;</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<h4 id="3-2HashMap几个重要的字段"><a href="#3-2HashMap几个重要的字段" class="headerlink" title="3.2HashMap几个重要的字段"></a>3.2HashMap几个重要的字段</h4><ol>
+<li>int threshold // 顾名思义：阈值,所能容纳的key-value对的极限。</li>
+<li>final float loadFactor //负载因子，默认的初始负载因子的大小是0.75,Node[]数组的默认长度是16，threhold = length*loadFactor。 当hashMap的实际容量大于threhold会发生resize操作,resize之后的容量是之前的两倍。默认的初始负载因子0.75是对时间效率和空间的一个平衡，如果在空间充足的情况下，对存取时间要求较高，可以调低loadFactor的值来减少hash碰撞，反之，可以加大loadFactor的值，并且这个值可以大于1。</li>
+<li>modCount 主要用来记录HashMap内部结构发生变化的次数，但是某个key对应的value值被覆盖不属于结构变化。  </li>
+</ol>
+<h4 id="3-3HashMap设计"><a href="#3-3HashMap设计" class="headerlink" title="3.3HashMap设计"></a>3.3HashMap设计</h4><ul>
+<li>hashMap数组的长度设计为2的n次方（合数），这是一种非常规的设计，常规的设计是把桶的长度设计成素数来减少冲突。HashMap采用这种非常规设计，主要是为了在取模和扩容时做优化，同时为了减少冲突，HashMap定位哈希桶索引位置时，也加入了高位参与运算的过程。  </li>
+<li>当hashMap链表过长时会严重影响hashMap的性能，jdk1.8版本之后，引入了红黑数的概念，当链表长度过长，默认超过8时，链表就转换为红黑树，利用红黑树快速增删改查的特点提高HashMap的性能。<h4 id="3-4方法实现"><a href="#3-4方法实现" class="headerlink" title="3.4方法实现"></a>3.4方法实现</h4></li>
+</ul>
+<h5 id="1-确定哈希桶数组的索引位置"><a href="#1-确定哈希桶数组的索引位置" class="headerlink" title="1.确定哈希桶数组的索引位置"></a>1.确定哈希桶数组的索引位置</h5><p>对于增加，查找，删除，确定哈希桶的位置是第一步，也是关键的一步。理论上，当元素分布均匀，每个桶的位置上只有一个元素时，就无需遍历链表，提高性能。HashMap定位数组索引位置，直接决定了hash方法的离散性能。下面是源码的实现：  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">  static final int hash(Object key) &#123;</div><div class="line">        int h;</div><div class="line">        return (key == null) ? 0 : (h = key.hashCode()) ^ (h &gt;&gt;&gt; 16);</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    final Node&lt;K,V&gt; getNode(int hash, Object key) &#123;</div><div class="line">        Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; first, e; int n; K k;</div><div class="line">        if ((tab = table) != null &amp;&amp; (n = tab.length) &gt; 0 &amp;&amp;</div><div class="line">            (first = tab[(n - 1) &amp; hash]) != null) &#123;</div><div class="line">            if (first.hash == hash &amp;&amp; // always check first node</div><div class="line">                ((k = first.key) == key || (key != null &amp;&amp; key.equals(k))))</div><div class="line">                return first;</div><div class="line">            if ((e = first.next) != null) &#123;</div><div class="line">                if (first instanceof TreeNode)</div><div class="line">                    return ((TreeNode&lt;K,V&gt;)first).getTreeNode(hash, key);</div><div class="line">                do &#123;</div><div class="line">                    if (e.hash == hash &amp;&amp;</div><div class="line">                        ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))</div><div class="line">                        return e;</div><div class="line">                &#125; while ((e = e.next) != null);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line">~~~  </div><div class="line"></div><div class="line">Hash算法本质上就是三步：取key的hashCode值、高位运算、取模运算。为了使元素均匀地分布在桶里面，一般做法是拿计算得到的hashcode值对数组长度进行取模运算。HashMap巧妙地通过h &amp; (table.length -1)来得到该对象的保存位，而HashMap底层数组的长度总是2的n次方，这是HashMap在速度上的优化。当length总是2的n次方时，h&amp; (length-1)运算等价于对length取模，也就是h%length，但是&amp;比%具有更高的效率。</div><div class="line"></div><div class="line">##### 2.put方法的实现</div></pre></td></tr></table></figure>
+<p> public V put(K key, V value) {<br>        return putVal(hash(key), key, value, false, true);<br> }<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line">~~~</div><div class="line">    final V putVal(int hash, K key, V value, boolean onlyIfAbsent,</div><div class="line">                   boolean evict) &#123;</div><div class="line">        Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; p; int n, i;</div><div class="line">        if ((tab = table) == null || (n = tab.length) == 0)</div><div class="line">            n = (tab = resize()).length;</div><div class="line">        if ((p = tab[i = (n - 1) &amp; hash]) == null)</div><div class="line">        //没有发生碰撞：定位该node在桶的位置，如果桶为空则创建node放进去</div><div class="line">            tab[i] = newNode(hash, key, value, null);</div><div class="line">        else &#123;</div><div class="line">        //发生碰撞：该位置已经存在值</div><div class="line">            Node&lt;K,V&gt; e; K k;</div><div class="line">            if (p.hash == hash &amp;&amp;</div><div class="line">                ((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))</div><div class="line">                e = p;</div><div class="line">                //如果是红黑树</div><div class="line">            else if (p instanceof TreeNode)</div><div class="line">                e = ((TreeNode&lt;K,V&gt;)p).putTreeVal(this, tab, hash, key, value);</div><div class="line">            else &#123;</div><div class="line">                //如果是链表，遍历链表</div><div class="line">                for (int binCount = 0; ; ++binCount) &#123;</div><div class="line">                    if ((e = p.next) == null) &#123;</div><div class="line">                        p.next = newNode(hash, key, value, null);</div><div class="line">                        if (binCount &gt;= TREEIFY_THRESHOLD - 1) // -1 for 1st</div><div class="line">                        //转成红黑树</div><div class="line">                            treeifyBin(tab, hash);</div><div class="line">                        break;</div><div class="line">                    &#125;</div><div class="line">                    //如果在遍历链表的时候找到key相同的则跳出循环。</div><div class="line">                    if (e.hash == hash &amp;&amp;</div><div class="line">                        ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))</div><div class="line">                        break;</div><div class="line">                    p = e;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            //赋值</div><div class="line">            if (e != null) &#123; // existing mapping for key</div><div class="line">                V oldValue = e.value;</div><div class="line">                if (!onlyIfAbsent || oldValue == null)</div><div class="line">                    e.value = value;</div><div class="line">                afterNodeAccess(e);</div><div class="line">                return oldValue;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        ++modCount;</div><div class="line">        if (++size &gt; threshold)</div><div class="line">            resize();</div><div class="line">         // 给LinkedHashMap重写</div><div class="line">        afterNodeInsertion(evict);</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line">~~~  </div><div class="line"></div><div class="line">##### 3.get方法的实现</div></pre></td></tr></table></figure></p>
+<pre><code>final Node&lt;K,V&gt; getNode(int hash, Object key) {
+    Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; first, e; int n; K k;
+    if ((tab = table) != null &amp;&amp; (n = tab.length) &gt; 0 &amp;&amp;
+        (first = tab[(n - 1) &amp; hash]) != null) {
+        //第一个直接命中
+        if (first.hash == hash &amp;&amp; // always check first node
+            ((k = first.key) == key || (key != null &amp;&amp; key.equals(k))))
+            return first;
+        if ((e = first.next) != null) {
+            if (first instanceof TreeNode)
+            //是红黑树
+                return ((TreeNode&lt;K,V&gt;)first).getTreeNode(hash, key);
+            //遍历链表    
+            do {
+                if (e.hash == hash &amp;&amp;
+                    ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))
+                    return e;
+            } while ((e = e.next) != null);
+        }
+    }
+    return null;
+}
+</code></pre><p>~~~</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/06/archives/单例模式/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1281,7 +1462,7 @@ FROM V$LOCKED_OBJECT l,V$SESSION S WHERE l.SESSION_ID=S.SID;</code><br>2.将上�
             
               <a href="/archives/">
             
-                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -1292,7 +1473,7 @@ FROM V$LOCKED_OBJECT l,V$SESSION S WHERE l.SESSION_ID=S.SID;</code><br>2.将上�
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
